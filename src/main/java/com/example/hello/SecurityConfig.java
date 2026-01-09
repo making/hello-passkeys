@@ -22,8 +22,10 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
-			.authorizeHttpRequests(
-					auth -> auth.requestMatchers("/login", "/error").permitAll().anyRequest().authenticated())
+			.authorizeHttpRequests(auth -> auth.requestMatchers("/login", "/error", "/*.css", "/*.js")
+				.permitAll()
+				.anyRequest()
+				.authenticated())
 			.formLogin(form -> form.loginPage("/login").defaultSuccessUrl("/", true))
 			.webAuthn(webauthn -> webauthn.rpName(webAuthnProps.rpName())
 				.rpId(webAuthnProps.rpId())

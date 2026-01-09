@@ -60,7 +60,7 @@ class HelloPasskeysApplicationTests {
 		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("username")));
 		driver.findElement(By.id("username")).sendKeys("user@example.com");
 		driver.findElement(By.id("password")).sendKeys("password");
-		driver.findElement(By.cssSelector("form.login-form button[type='submit']")).click();
+		driver.findElement(By.cssSelector(".auth-form .btn-primary")).click();
 		// Wait for successful login
 		wait.until(ExpectedConditions.urlToBe("http://localhost:34321/"));
 		assertThat(driver.findElement(By.id("hello")).getText()).isEqualTo("Hello user@example.com!");
@@ -68,12 +68,12 @@ class HelloPasskeysApplicationTests {
 		// Step 2: Register a passkey
 		driver.get("http://localhost:34321/passkeys");
 		// Wait for registration form
-		driver.findElement(By.cssSelector("button.add-button")).click();
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("passkeyName")));
+		driver.findElement(By.cssSelector(".btn-add")).click();
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("passkey-name")));
 		// Enter passkey label
-		driver.findElement(By.id("passkeyName")).sendKeys("My Test Passkey");
+		driver.findElement(By.id("passkey-name")).sendKeys("My Test Passkey");
 		// Click register button and wait for WebAuthn ceremony
-		driver.findElement(By.id("add-passkey")).click();
+		driver.findElement(By.id("btn-add-passkey")).click();
 		// Check credentials were created - should be exactly 1
 		wait.until(driver -> authenticator.getCredentials().size() == 1);
 		assertThat(authenticator.getCredentials()).hasSize(1);
@@ -81,10 +81,10 @@ class HelloPasskeysApplicationTests {
 		// Step 3: Logout
 		driver.get("http://localhost:34321/logout");
 		// Wait for logout confirmation page
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("button[type='submit']")));
+		wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".auth-form .btn-primary")));
 		assertThat(driver.findElement(By.tagName("body")).getText()).contains("Are you sure you want to log out?");
-		// Confirm logout
-		driver.findElement(By.cssSelector("button[type='submit']")).click();
+		// Confirm logout by submitting the form
+		driver.findElement(By.cssSelector(".auth-form")).submit();
 		// Wait for redirect to login page
 		wait.until(ExpectedConditions.urlContains("/login"));
 

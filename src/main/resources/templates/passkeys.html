@@ -1,429 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Passkey Management</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            background-color: #f8faf9;
-            color: #2c3e50;
-            line-height: 1.6;
-            padding: 60px 20px 40px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 40px;
-            color: #1a202c;
-            text-align: center;
-        }
-
-        /* Alert styles */
-        .alert {
-            padding: 16px 20px 16px 48px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 15px;
-            font-weight: 500;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-
-        .alert::before {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .alert-success {
-            background-color: #d1f3db;
-            border: 2px solid #6db33f;
-            color: #2d5f3f;
-        }
-
-        .alert-success::before {
-            content: "✓";
-            color: #6db33f;
-        }
-
-        .alert-danger {
-            background-color: #ffebee;
-            border: 2px solid #ef5350;
-            color: #c62828;
-        }
-
-        .alert-danger::before {
-            content: "⚠";
-            color: #ef5350;
-        }
-
-        .passkeys-card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(109, 179, 63, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 24px 32px;
-            background-color: #f0f8f4;
-            border-bottom: 1px solid #d4e8dc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .add-button {
-            background-color: #6db33f;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            font-size: 15px;
-            font-weight: 500;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .add-button:hover {
-            background-color: #5ca230;
-        }
-
-        .passkey-list {
-            padding: 8px;
-        }
-
-        .passkey-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 24px;
-            margin: 8px;
-            border-radius: 12px;
-            background-color: #fafffe;
-            transition: all 0.2s;
-            border: 1px solid #e8f5e9;
-        }
-
-        .passkey-item:hover {
-            background-color: #f1f8f4;
-            transform: translateX(4px);
-            border-color: #c8e6c9;
-        }
-
-        .passkey-info {
-            display: flex;
-            align-items: center;
-            flex: 1;
-        }
-
-        .passkey-details {
-            flex: 1;
-        }
-
-        .passkey-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 4px;
-        }
-
-        .passkey-meta {
-            font-size: 13px;
-            color: #a0aec0;
-        }
-
-        .passkey-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .action-btn {
-            width: 36px;
-            height: 36px;
-            background-color: white;
-            border: 2px solid #c8e6c9;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            color: #66bb6a;
-        }
-
-        .action-btn:hover {
-            border-color: #6db33f;
-            background-color: #f1f8f4;
-            color: #388e3c;
-        }
-
-        .edit-icon::before {
-            content: "✎";
-            font-size: 18px;
-        }
-
-        .delete-icon::before {
-            content: "✕";
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        /* Modal styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal {
-            background-color: white;
-            border-radius: 20px;
-            padding: 32px;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            animation: modalSlideIn 0.3s ease-out;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            margin-bottom: 24px;
-            text-align: center;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a202c;
-        }
-
-        .modal-body {
-            margin-bottom: 32px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            background-color: #fafffe;
-            border: 2px solid #c8e6c9;
-            border-radius: 8px;
-            color: #2d3748;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #6db33f;
-            background-color: white;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-        }
-
-        .btn {
-            padding: 10px 24px;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            min-width: 100px;
-        }
-
-        .btn-cancel {
-            background-color: #e2e8f0;
-            color: #4a5568;
-        }
-
-        .btn-cancel:hover {
-            background-color: #cbd5e0;
-        }
-
-        .btn-primary {
-            background-color: #6db33f;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #5ca230;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px 24px;
-            color: #718096;
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 24px;
-            opacity: 0.5;
-        }
-
-        .empty-state-text {
-            font-size: 18px;
-            margin-bottom: 32px;
-            color: #4a5568;
-        }
-    </style>
+    <th:block th:replace="~{fragments/head :: common}"/>
+    <title>Passkey Demo - Passkeys</title>
+    <script th:src="@{/script.js}"></script>
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", () => {
-            const headers = {
-                [[${_csrf.getHeaderName()}]]: [[${_csrf.getToken()}]]
-            };
-
-            function addModal() {
-                document.getElementById('addModal').style.display = 'flex';
-            }
-
-            function hideModal(event) {
-                if (event && event.target !== event.currentTarget) return;
-                document.getElementById('addModal').style.display = 'none';
-                document.getElementById('passkeyName').value = '';
-            }
-
-            async function addPasskey() {
-                const passkeyLabel = document.querySelector("#passkeyName").value
-
-                if (!passkeyLabel) {
-                    console.error("must set passkey label")
-                    return;
-                }
-                try {
-                    const registerOptionsResponse = await fetch("/webauthn/register/options",
-                        {
-                            method: "POST",
-                            headers
-                        }).then(r => r.json());
-                    const userId = window.atob(registerOptionsResponse.user.id.replace(/-/g, "+").replace(/_/g, "/"))
-                    const challenge = window.atob(registerOptionsResponse.challenge.replace(/-/g, "+").replace(/_/g, "/"))
-                    const options = {
-                        ...registerOptionsResponse,
-                        excludeCredentials: [],
-                        user: {
-                            ...registerOptionsResponse.user,
-                            id: Uint8Array.from(userId, c => c.charCodeAt(0))
-                        },
-                        challenge: Uint8Array.from(challenge, c => c.charCodeAt(0))
-                    }
-                    const authenticatorData = await navigator.credentials.create({publicKey: options})
-                    await fetch("/webauthn/register",
-                        {
-                            method: "POST",
-                            headers: {
-                                ...headers,
-                                "content-type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                publicKey: {
-                                    credential: authenticatorData,
-                                    label: passkeyLabel
-                                }
-                            })
-                        }).then(r => r.json());
-                    window.location.href = window.location.pathname + "?success"
-                } catch (e) {
-                    console.error("Could not register passkey")
-                    console.error(e)
-                }
-                hideModal();
-            }
-
-            document.querySelectorAll(".add-button").forEach(btn => {
-                btn.addEventListener('click', addModal);
+            const manager = new PasskeyManager({
+                headers: {
+                    [[${_csrf.getHeaderName()}]]: [[${_csrf.getToken()}]]
+                },
+                modal: document.getElementById("add-modal"),
+                passkeyNameInput: document.getElementById("passkey-name"),
+                addPasskeyButton: document.getElementById("btn-add-passkey"),
+                addButtons: document.querySelectorAll(".btn-add"),
+                closeButtons: document.querySelectorAll(".modal-close"),
+                deleteButtons: document.querySelectorAll(".delete-icon")
             });
-            document.querySelectorAll(".hide-button").forEach(btn => {
-                btn.addEventListener('click', hideModal);
-            });
-            document.querySelector('#add-passkey').addEventListener('click', async () => {
-                await addPasskey();
-            });
-            // Delete button event listeners
-            document.querySelectorAll('.delete-icon').forEach(btn => {
-                btn.addEventListener('click', async evt => {
-                    const id = evt.target.getAttribute("data-id")
-                    if (confirm('Are you sure you want to delete this passkey?')) {
-                        const resp = await fetch(`/webauthn/register/${id}`,
-                            {
-                                method: "DELETE",
-                                headers
-                            });
-                        if (resp.status === 204) {
-                            evt.target.parentElement.parentElement.remove()
-                        } else {
-                            alert(`Failed to delete passkey (status:${resp.status})`);
-                        }
-                    }
-                });
-            });
+            manager.init();
         });
     </script>
 </head>
 <body>
+<th:block th:replace="~{fragments/header :: site}"/>
 <div class="container">
-    <h1>Passkeys</h1>
+    <h1 class="page-title">Passkeys</h1>
 
-    <!-- Alert messages -->
     <div id="success" class="alert alert-success" role="alert">
         Success! Your passkey has been added successfully.
     </div>
@@ -434,16 +36,15 @@
     <div class="passkeys-card">
         <div class="card-header">
             <h2 class="card-title">Your passkeys</h2>
-            <button class="add-button">Add a passkey</button>
+            <button class="btn-add">Add a passkey</button>
         </div>
-        <div class="passkey-list" id="passkeyList" th:if="${!#lists.isEmpty(passkeys)}">
-            <div class="passkey-item" th:each="passkey :${passkeys}">
+        <div class="passkey-list" id="passkey-list" th:if="${!#lists.isEmpty(passkeys)}">
+            <div class="passkey-item" th:each="passkey : ${passkeys}">
                 <div class="passkey-info">
                     <div class="passkey-details">
                         <div class="passkey-name" th:text="${passkey.label}">Chrome</div>
                         <div class="passkey-meta">Added on
-                            <span th:text="${#dates.format(passkey.created, 'yyyy-MM-dd hh:mm')}"/> | Last
-                            used on
+                            <span th:text="${#dates.format(passkey.created, 'yyyy-MM-dd hh:mm')}"/> | Last used on
                             <span th:text="${#dates.format(passkey.lastUsed, 'yyyy-MM-dd hh:mm')}"/>
                         </div>
                     </div>
@@ -457,13 +58,12 @@
         <div class="empty-state" th:if="${#lists.isEmpty(passkeys)}">
             <div class="empty-state-icon">🔐</div>
             <div class="empty-state-text">No passkeys yet</div>
-            <button class="add-button">Add your first passkey</button>
+            <button class="btn-add">Add your first passkey</button>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
-<div class="modal-overlay hide-button" id="addModal">
+<div class="modal-overlay modal-close" id="add-modal">
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3 class="modal-title">Add a new passkey</h3>
@@ -471,16 +71,14 @@
         <div class="modal-body">
             <div class="form-group">
                 <label class="form-label">Label</label>
-                <input type="text" class="form-input" placeholder="e.g., iCloud" id="passkeyName">
+                <input type="text" class="form-input" placeholder="e.g., iCloud" id="passkey-name">
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-cancel hide-button">Cancel</button>
-            <button class="btn btn-primary" id="add-passkey">Add passkey</button>
+            <button class="btn btn-cancel modal-close">Cancel</button>
+            <button class="btn btn-primary" id="btn-add-passkey">Add passkey</button>
         </div>
     </div>
 </div>
-
-
 </body>
 </html>
