@@ -61,6 +61,9 @@ class PasskeyAuth {
                 return;
             }
         } catch (err) {
+            if (err.name === "NotAllowedError") {
+                return;
+            }
             console.error(err);
         }
 
