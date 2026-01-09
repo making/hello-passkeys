@@ -1,5 +1,7 @@
 # Spring Security Passkeys Demo
 
+https://github.com/user-attachments/assets/9968db89-7434-41c9-95cb-3a26023bae2a
+
 A quick demonstration project for testing Spring Security's passkey authentication feature.
 
 ## Overview
