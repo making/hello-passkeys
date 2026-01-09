@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: common}"/>
+    <title>Passkey Demo - Passkeys</title>
+    <script th:src="@{/script.js}"></script>
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const manager = new PasskeyManager({
+                headers: {
+                    [[${_csrf.getHeaderName()}]]: [[${_csrf.getToken()}]]
+                },
+                modal: document.getElementById("add-modal"),
+                passkeyNameInput: document.getElementById("passkey-name"),
+                addPasskeyButton: document.getElementById("btn-add-passkey"),
+                addButtons: document.querySelectorAll(".btn-add"),
+                closeButtons: document.querySelectorAll(".modal-close"),
+                deleteButtons: document.querySelectorAll(".delete-icon")
+            });
+            manager.init();
+        });
+    </script>
+</head>
+<body>
+<th:block th:replace="~{fragments/header :: site}"/>
+<div class="container">
+    <h1 class="page-title">Passkeys</h1>
+
+    <div id="success" class="alert alert-success" role="alert">
+        Success! Your passkey has been added successfully.
+    </div>
+    <div id="error" class="alert alert-danger" role="alert">
+        Error: Failed to add passkey. Please try again.
+    </div>
+
+    <div class="passkeys-card">
+        <div class="card-header">
+            <h2 class="card-title">Your passkeys</h2>
+            <button class="btn-add">Add a passkey</button>
+        </div>
+        <div class="passkey-list" id="passkey-list" th:if="${!#lists.isEmpty(passkeys)}">
+            <div class="passkey-item" th:each="passkey : ${passkeys}">
+                <div class="passkey-info">
+                    <div class="passkey-details">
+                        <div class="passkey-name" th:text="${passkey.label}">Chrome</div>
+                        <div class="passkey-meta">Added on
+                            <span th:text="${#dates.format(passkey.created, 'yyyy-MM-dd hh:mm')}"/> | Last used on
+                            <span th:text="${#dates.format(passkey.lastUsed, 'yyyy-MM-dd hh:mm')}"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="passkey-actions">
+                    <button class="action-btn delete-icon" title="Delete"
+                            th:data-id="${passkey.getCredentialId().toBase64UrlString()}"></button>
+                </div>
+            </div>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(passkeys)}">
+            <div class="empty-state-icon">🔐</div>
+            <div class="empty-state-text">No passkeys yet</div>
+            <button class="btn-add">Add your first passkey</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay modal-close" id="add-modal">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 class="modal-title">Add a new passkey</h3>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Label</label>
+                <input type="text" class="form-input" placeholder="e.g., iCloud" id="passkey-name">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel modal-close">Cancel</button>
+            <button class="btn btn-primary" id="btn-add-passkey">Add passkey</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

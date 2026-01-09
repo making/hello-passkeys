@@ -42,7 +42,7 @@ Note: These credentials can be customized via the `spring.security.user.name` an
 ### 4. Register a Passkey
 
 After successful login:
-1. Navigate to http://localhost:8080/webauthn/register
+1. Navigate to http://localhost:8080/passkeys
 2. Follow your browser's prompts to register a passkey
 
 ### 5. Test Passkey Authentication

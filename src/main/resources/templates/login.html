@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: common}"/>
+    <title>Passkey Demo - Sign In</title>
+    <script th:src="@{/script.js}"></script>
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const auth = new PasskeyAuth({
+                headers: {
+                    [[${_csrf.getHeaderName()}]]: [[${_csrf.getToken()}]]
+                },
+                signinButton: document.getElementById("passkey-signin")
+            });
+            auth.init();
+        });
+    </script>
+</head>
+<body>
+<th:block th:replace="~{fragments/header :: site}"/>
+<div class="container">
+    <h1 class="page-title">Sign In</h1>
+    <div class="login-grid">
+        <div class="login-section">
+            <h2 class="login-section-title">Sign in with Passkey</h2>
+            <p class="login-section-desc">Use your fingerprint, face, or screen lock to sign in securely.</p>
+            <button id="passkey-signin" class="btn btn-primary btn--block">Sign in with a passkey</button>
+        </div>
+        <div class="login-divider">
+            <span>or</span>
+        </div>
+        <div class="login-section">
+            <label for="username" class="login-section-title">Sign in with Password</label>
+            <form th:action="@{/login}" method="post" class="auth-form">
+                <div class="form-group">
+                    <input type="text" class="form-input" placeholder="Username" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" placeholder="Password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn--block">Sign in</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

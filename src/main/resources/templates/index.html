@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <th:block th:replace="~{fragments/head :: common}"/>
+    <title>Passkey Demo - Welcome</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/header :: site}"/>
+<div class="container">
+    <div class="welcome-card">
+        <h1 class="welcome-title">Welcome</h1>
+        <p id="hello" class="welcome-message">Hello <span sec:authentication="name"></span>!</p>
+        <div class="welcome-nav">
+            <a th:href="@{/passkeys}" class="btn btn-primary">Manage Passkeys</a>
+            <a th:href="@{/logout}" class="btn btn-secondary">Logout</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
