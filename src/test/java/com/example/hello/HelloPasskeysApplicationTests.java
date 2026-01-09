@@ -62,17 +62,18 @@ class HelloPasskeysApplicationTests {
 		driver.findElement(By.id("password")).sendKeys("password");
 		driver.findElement(By.cssSelector("form.login-form button[type='submit']")).click();
 		// Wait for successful login
-		wait.until(ExpectedConditions.urlToBe("http://localhost:34321/?continue"));
-		assertThat(driver.findElement(By.tagName("body")).getText()).isEqualTo("Hello user@example.com!");
+		wait.until(ExpectedConditions.urlToBe("http://localhost:34321/"));
+		assertThat(driver.findElement(By.id("hello")).getText()).isEqualTo("Hello user@example.com!");
 
 		// Step 2: Register a passkey
-		driver.get("http://localhost:34321/webauthn/register");
+		driver.get("http://localhost:34321/passkeys");
 		// Wait for registration form
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("label")));
+		driver.findElement(By.cssSelector("button.add-button")).click();
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("passkeyName")));
 		// Enter passkey label
-		driver.findElement(By.id("label")).sendKeys("My Test Passkey");
+		driver.findElement(By.id("passkeyName")).sendKeys("My Test Passkey");
 		// Click register button and wait for WebAuthn ceremony
-		driver.findElement(By.id("register")).click();
+		driver.findElement(By.id("add-passkey")).click();
 		// Check credentials were created - should be exactly 1
 		wait.until(driver -> authenticator.getCredentials().size() == 1);
 		assertThat(authenticator.getCredentials()).hasSize(1);
@@ -95,7 +96,7 @@ class HelloPasskeysApplicationTests {
 		passkeyButton.click();
 		// Check if login was successful
 		wait.until(ExpectedConditions.urlToBe("http://localhost:34321/"));
-		assertThat(driver.findElement(By.tagName("body")).getText()).isEqualTo("Hello user@example.com!");
+		assertThat(driver.findElement(By.id("hello")).getText()).isEqualTo("Hello user@example.com!");
 	}
 
 }

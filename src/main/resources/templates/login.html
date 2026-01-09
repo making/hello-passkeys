@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: #f8faf9;
+            color: #2c3e50;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 60px 20px 40px;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(109, 179, 63, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+            padding: 48px;
+            max-width: 450px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            color: #1a202c;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #fafffe;
+            border: 2px solid #c8e6c9;
+            border-radius: 8px;
+            color: #2d3748;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6db33f;
+            background-color: white;
+        }
+
+        .form-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            background-color: #6db33f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #5ca230;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 32px 0 24px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: #6db33f;
+            border: 2px solid #6db33f;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f8f4;
+            border-color: #5ca230;
+            color: #5ca230;
+        }
+    </style>
+    <script type="text/javascript" th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const headers = {
+                [[${_csrf.getHeaderName()}]]: [[${_csrf.getToken()}]]
+            };
+
+            document.querySelector("#passkey-signin").addEventListener("click", async evt => {
+                if (!window.PublicKeyCredential) { /* Client not capable. Handle error. */
+                    alert('Passkey is not supported.')
+                    return;
+                }
+                const optionsResponse = await fetch("/webauthn/authenticate/options",
+                    {
+                        method: "POST",
+                        headers: {
+                            ...headers,
+                            "content-type": "application/json"
+                        }
+                    }).then(r => r.json());
+                const b64challenge = window.atob(optionsResponse.challenge.replace(/-/g, "+").replace(/_/g, "/"));
+                // SPEC
+                const options = {
+                    ...optionsResponse,
+                    challenge: Uint8Array.from(b64challenge, c => c.charCodeAt(0))
+                };
+                try {
+                    const authenticatorData = await navigator.credentials.get({publicKey: options});
+                    const authResponse = await fetch("/login/webauthn",
+                        {
+                            method: "POST",
+                            headers: {
+                                ...headers,
+                                "content-type": "application/json"
+                            },
+                            body: JSON.stringify(authenticatorData)
+                        });
+                    if (authResponse.ok) {
+                        //window.location.href = authResponse.redirectUrl
+                        window.location.href = '/';
+                        return;
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+                console.error("Could not login with passkey")
+                alert('Could not login with passkey');
+            });
+        })
+    </script>
+</head>
+<body>
+<div class="login-container">
+    <h1>Please sign in</h1>
+
+    <form th:action="@{/login}" method="post" class="login-form">
+        <div class="form-group">
+            <input type="text" class="form-input" placeholder="Username" id="username" name="username"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <input type="password" class="form-input" placeholder="Password" id="password" name="password"
+                   required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Sign in</button>
+    </form>
+
+    <div class="divider">Login with Passkeys</div>
+
+    <button id="passkey-signin" class="btn btn-secondary">Sign in with a passkey</button>
+</div>
+
+</body>
+</html>
